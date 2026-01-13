@@ -1,0 +1,79 @@
+---
+title: "Air Quality Monitoring Stations"
+author: "Mohsen Nikfarjam"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+This interactive map displays hypothetical Air Quality Monitoring Stations. The data is simulated to demonstrate the use of R Markdown and Leaflet.
+
+**Date of creation:** `r Sys.Date()`
+
+## Interactive Map
+
+The map below shows the locations of various monitoring stations. Click on a marker to see the station name and current Air Quality Index (AQI).
+
+```{r map, echo=FALSE, message=FALSE, warning=FALSE}
+# Check if pkgs are installed, if not, this script assumes they are or user handles it.
+# In a real environment, we'd use library() calls.
+
+if (!require("leaflet")) {
+  install.packages("leaflet", repos = "http://cran.us.r-project.org")
+  library(leaflet)
+}
+if (!require("dplyr")) {
+  install.packages("dplyr", repos = "http://cran.us.r-project.org")
+  library(dplyr)
+}
+
+# Mock Data: Air Quality Stations
+stations <- data.frame(
+  lat = c(34.0522, 40.7128, 51.5074, 48.8566, 35.6895),
+  lng = c(-118.2437, -74.0060, -0.1278, 2.3522, 139.6917),
+  place = c("Los Angeles Station", "New York Station", "London Station", "Paris Station", "Tokyo Station"),
+  aqi = c(45, 30, 25, 35, 50),
+  popup_info = c(
+    "<strong>Los Angeles Station</strong><br>AQI: 45 (Good)",
+    "<strong>New York Station</strong><br>AQI: 30 (Good)",
+    "<strong>London Station</strong><br>AQI: 25 (Good)",
+    "<strong>Paris Station</strong><br>AQI: 35 (Good)",
+    "<strong>Tokyo Station</strong><br>AQI: 50 (Moderate)"
+  )
+)
+
+# Custom color function based on AQI (just for fun/visuals)
+getColor <- function(stations) {
+  sapply(stations$aqi, function(aqi) {
+    if(aqi <= 50) {
+      "green"
+    } else if(aqi <= 100) {
+      "orange"
+    } else {
+      "red"
+    }
+  })
+}
+
+icons <- awesomeIcons(
+  icon = 'ios-cloud',
+  iconColor = 'black',
+  library = 'ion',
+  markerColor = getColor(stations)
+)
+
+# Create Leaflet Map
+stations %>%
+  leaflet() %>%
+  addTiles() %>%
+  addMarkers(
+    lat = ~lat, 
+    lng = ~lng, 
+    popup = ~popup_info
+  )
+```
